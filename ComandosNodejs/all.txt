@@ -1,0 +1,165 @@
+//Crear el projecto
+ng new angular-tour-of-heroes
+//Arrancar servicio 
+ng serve --open
+//Modificar el app.component.ts añadiendo un título
+title = 'Tour of heores';
+//Borrar el app.component.html
+<h1>{{title}}</h1>
+//---------------------------------------------------
+//---------------------------------------------------
+//Crear componente
+ng generate component heroes
+//Modificar el app.component.html añadiendo
+<app-heroes></app-heroes>
+//Crear un documento nuevo llamado hero.ts
+export interface Hero {
+  id: number;
+  name: string;
+}
+//Añadimos los datos de hero.ts a heroes.component.ts e importamos
+import { Hero } from '../hero';
+hero : Hero ={
+ id: 1, name: 'Tormenta'
+ };
+//No funcionará, importa FormsModule en app.module.ts
+import { FormsModule } from '@angular/forms';
+//Two-way binding
+<div>
+  <label for="name">Hero name: </label>
+  <input id="name" [(ngModel)]="hero.name" placeholder="name">
+</div>
+//---------------------------------------------------
+//---------------------------------------------------
+//Crear lista de la clase
+mock-heroes-ts
+import { Hero } from './hero';
+
+export const HEROES: Hero[] = [
+  { id: 12, name: 'Dr. Nice' },
+  { id: 13, name: 'Bombasto' },
+  { id: 14, name: 'Celeritas' },
+  { id: 15, name: 'Magneta' },
+  { id: 16, name: 'RubberMan' },
+  { id: 17, name: 'Dynama' },
+  { id: 18, name: 'Dr. IQ' },
+  { id: 19, name: 'Magma' },
+  { id: 20, name: 'Tornado' }
+];
+//Importas HEROES
+import { HEROES } from '../mock-heroes';
+ heroes = HEROES;
+  selectedHero?: Hero;
+//Modificar heroes.component.html
+//---------------------------------------------------
+//---------------------------------------------------
+//Crear detalles de componente
+ng generate component hero-detail
+//Importar Hero y crear @imput
+import { Hero } from '../hero';
+@Input() hero?: Hero;
+//Modificar hero-detail.component.html
+<div *ngIf="hero">
+
+    <h2>{{hero.name | uppercase}} Details</h2>
+    <div><span>id: </span>{{hero.id}}</div>
+    <div>
+      <label for="hero-name">Hero name: </label>
+      <input id="hero-name" [(ngModel)]="hero.name" placeholder="name">
+    </div>
+  
+  </div>
+//Sustituir la parte de los detalles en el archivo heroes.component.html
+<app-hero-detail [hero]="selectedHero"></app-hero-detail>
+//---------------------------------------------------
+//---------------------------------------------------
+//Crear el servicio
+ng generate service hero
+//Añadir todo esto a hero.service.ts
+import { Injectable } from '@angular/core';
+
+import { Observable, of } from 'rxjs';
+
+import { Hero } from './hero';
+import { HEROES } from './mock-heroes';
+import { MessageService } from './message.service';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class HeroService {
+
+  constructor(private messageService: MessageService) { }
+
+  getHeroes(): Observable<Hero[]> {
+    const heroes = of(HEROES);
+    this.messageService.add('HeroService: fetched heroes');
+    return heroes;
+  }
+}
+//Crear el componente messages
+ng generate component messages
+//Crear message.service.ts
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class MessageService {
+  messages: string[] = [];
+
+  add(message: string) {
+    this.messages.push(message);
+  }
+
+  clear() {
+    this.messages = [];
+  }
+}
+//Modificar heroes.component.ts
+import { Component, OnInit } from '@angular/core';
+
+import { Hero } from '../hero';
+import { HeroService } from '../hero.service';
+import { MessageService } from '../message.service';
+
+@Component({
+  selector: 'app-heroes',
+  templateUrl: './heroes.component.html',
+  styleUrls: ['./heroes.component.css']
+})
+export class HeroesComponent implements OnInit {
+
+  selectedHero?: Hero;
+
+  heroes: Hero[] = [];
+
+  constructor(private heroService: HeroService, private messageService: MessageService) { }
+
+  ngOnInit(): void {
+    this.getHeroes();
+  }
+
+  onSelect(hero: Hero): void {
+    this.selectedHero = hero;
+    this.messageService.add(`HeroesComponent: Selected hero id=${hero.id}`);
+  }
+
+  getHeroes(): void {
+    this.heroService.getHeroes()
+        .subscribe(heroes => this.heroes = heroes);
+  }
+}
+//Importar messages.component.ts
+import { MessageService } from '../message.service';
+//Modificar message.component.html
+<div *ngIf="messageService.messages.length">
+
+  <h2>Messages</h2>
+  <button type="button" class="clear"
+          (click)="messageService.clear()">Clear messages</button>
+  <div *ngFor='let message of messageService.messages'> {{message}} </div>
+
+</div>
+//Añadir a app.component.html
+<app-messages></app-messages>
